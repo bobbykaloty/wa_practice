@@ -2,6 +2,25 @@
 
 <!-- Step 1: List all transactions, starting with the ICO -->
 
+<% transactions = Transaction.all %>
+
+<ul>
+  <% for transaction in transactions %>
+    <% sender_id = transaction["from_user_id"] %>
+    <% sender_name = User.find_by({ "id" => sender_id })["name"] unless sender_id.nil?%>
+    <% receiver_id = transaction["to_user_id"] %>
+    <% receiver_name = User.find_by({ "id" => receiver_id })["name"] %>
+    <% amount = transaction["amount"] %>
+    <li>
+      <% if sender_id == nil %>
+        Initial coin offering: <%= amount%> to <%= receiver_name%>
+      <% else %>
+        <%= amount%> KC from <%= sender_name%> to <%= receiver_name%>
+      <% end %>
+    </li>
+  <% end %>
+</ul>
+
 <!-- Step 2: Calculate and display the balances -->
 
 <!-- 
@@ -12,3 +31,27 @@ Balance for Evan: 1164 KC
 Balance for Anthony: 1456 KC
 Balance for Krystina: 3516 KC 
 -->
+
+<% balances = {} %>
+
+<% users = User.all %>
+
+<% for user in users %>
+  <% balances[user.name] = 0 %>
+<% end %>
+
+<% for transaction in transactions %>
+  <% sender_id = transaction["from_user_id"] %>
+  <% sender_name = User.find_by({ "id" => sender_id })["name"] unless sender_id.nil? %>
+  <% receiver_id = transaction["to_user_id"] %>
+  <% receiver_name = User.find_by({ "id" => receiver_id })["name"] %>
+  <% amount = transaction["amount"] %>
+  <% balances[sender_name] = balances[sender_name] - amount unless sender_id.nil? %>
+  <% balances[receiver_name] = balances[receiver_name] + amount %>
+<% end %>
+
+<ul>
+  <% balances.each do |name, balance| %>
+    <li> Balance for <%= name %>: <%= balance%> KC </li>
+  <% end %>
+</ul>
